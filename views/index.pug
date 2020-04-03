@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  script(src='/javascripts/auth.js')
+  #editor
+    #left
+      select#songlist(onchange='song()', size=2)
+    #middle
+      .input
+        label#fortitle(for='title') Title
+        #titlebox
+          input#title(
+            type='text', 
+            oninput='title()',
+            autocomplete='off'
+          )
+          #id
+      label#forlyrics(for='lyrics') Lyrics
+      textarea#lyrics(oninput='lyrics()')
+      input#debug(type='text', readonly)
+    #right
+      #showtitle
+      #showlyrics
+      .input
+        img#delete(src='/images/delete.svg', onclick='del()')
+        input#new(type='button', value='New', onclick='res()')
+        input#save(type='button', value='Save', onclick='sav()')
+  #modal
+  #window
+    #message
+    .input
+      input#confirm(type='button', value='Confirm', onclick='')
+      input#cancel(type='button', value='Cancel', onclick='')
+  script(src='/javascripts/main.js')

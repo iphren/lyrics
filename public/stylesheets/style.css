@@ -1,0 +1,111 @@
+@font-face {
+  font-family: SourceHanSansCN;
+  src: url(SourceHanSansCN-Regular.otf);
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+label {
+  user-select: none;
+}
+
+body, input, textarea, option {
+  font-size: 1.5vw;
+  font-family: SourceHanSansCN;
+}
+
+input[type='text'], textarea {
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: black 1px solid;
+}
+
+#editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+#left, #middle, #right {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 20%;
+}
+
+#middle, #right {
+  width: 40%;
+  padding: 1vw;
+  box-sizing: border-box;
+}
+
+#songlist {
+  outline: none;
+  border: none;
+  flex-grow: 1;
+}
+
+#lyrics {
+  resize: none;
+  flex-grow: 1;
+}
+
+#showlyrics {
+  flex-grow: 1;
+}
+
+#id:before {
+  content: 'id: ';
+}
+
+#id:empty:before {
+  content: none;
+}
+
+#id {
+  padding: 0 1vw; 
+  box-sizing: border-box;
+  color: gray;
+  font-style: italic;
+  font-size: 80%;
+  height: 2vw;
+}
+
+.input {
+  display: flex;
+  flex-direction: row;
+}
+
+.input > * {
+  margin-right: 1vw;
+  flex-grow: 1;
+}
+
+.input > *:first-child {
+  flex-grow: 0;
+}
+
+.input > *:last-child {
+  margin: 0;
+}
+
+#delete, #debug {
+  height: 2.5vw;
+  outline: none;
+}
+
+#debug, .input {
+  margin-top: 1vw;
+}
+
+#debug {
+  color: gray;
+}
