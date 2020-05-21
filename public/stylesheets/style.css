@@ -1,5 +1,5 @@
 @font-face {
-  font-family: SourceHanSansCN;
+  font-family: SourceHanSans;
   src: url(SourceHanSansCN-Regular.otf);
 }
 
@@ -14,7 +14,7 @@ label {
 
 body, input, textarea, option {
   font-size: 1.5vw;
-  font-family: SourceHanSansCN;
+  font-family: SourceHanSans;
 }
 
 input[type='text'], textarea {
@@ -97,6 +97,11 @@ input[type='text'], textarea {
   margin: 0;
 }
 
+#delete {
+  visibility: hidden;
+  cursor: pointer;
+}
+
 #delete, #debug {
   height: 2.5vw;
   outline: none;
@@ -108,4 +113,30 @@ input[type='text'], textarea {
 
 #debug {
   color: gray;
+  cursor: default;
+}
+
+#showtitle {
+  font-size: 150%;
+  font-weight: 700;
+}
+
+#showlyrics {
+  overflow: auto;
+  white-space: nowrap;
+}
+#tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2.5vw;
+  width: 20vw;
+  background-color: whitesmoke;
+  z-index: 10;
+  display: none;
+  text-overflow: ellipsis;
+  white-space: nowrap; 
+  overflow: hidden;
+  padding: 0 1vw;
+  box-sizing: border-box;
 }
