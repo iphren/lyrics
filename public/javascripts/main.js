@@ -15,6 +15,8 @@ class Listened {
   };
 };
 
+const baseUrl = 'https://elimfgcc.org/lyrics/';
+
 var debug = document.getElementById('debug');
 var tooltip = document.getElementById('tooltip');
 var saveBtn = document.getElementById('save');
@@ -24,20 +26,15 @@ var titleTag = document.getElementById('title');
 var lyricsTag = document.getElementById('lyrics');
 titleTag.value = '';
 lyricsTag.value = '';
+saveBtn.disabled = true;
 
 var oldTitle = '', oldLyrics = '', oldId = '';
 var id = new Listened('');
 id.onchange(val => inner('id',val));
 var title = new Listened('');
-title.onchange(val => {
-  inner('showtitle',val);
-  saveBtn.disabled = (val == oldTitle && lyrics.value == oldLyrics);
-});
+title.onchange(val => inner('showtitle',val));
 var lyrics = new Listened('');
-lyrics.onchange(val => {
-  inner('showlyrics',val);
-  saveBtn.disabled = (val == oldLyrics && title.value == oldTitle);
-});
+lyrics.onchange(val => inner('showlyrics',val));
 var tooltipTimer, lockTimer;
 
 debug.value = 'loading lyrics......';
@@ -154,19 +151,25 @@ var enableSave;
 async function changeTitle() {
   clearTimeout(enableSave);
   save.disabled = true;
-  //let i = (await request('trad',[titleTag.value])).join('');
-  title.value = titleTag.value;
+  enableSave = setTimeout(saveState, 1000);
+
+  let i = await request('formal',{text:titleTag.value});
+  title.value = i.text;
   let j = await request('id',{title: title.value, old: oldId});
   id.value = j.id;
-  enableSave = setTimeout(function(){save.disabled = (title.value == oldTitle && lyrics.value == oldLyrics);}, 1000);
 };
 
 async function changeLyrics() {
   clearTimeout(enableSave);
   save.disabled = true;
-  //lyrics.value = (await request('trad',[lyricsTag.value])).join('');
-  lyrics.value = lyricsTag.value;
-  enableSave = setTimeout(function(){save.disabled = (title.value == oldTitle && lyrics.value == oldLyrics);}, 1000);
+  enableSave = setTimeout(saveState, 1000);
+
+  let i = await request('formal',{text:lyricsTag.value});
+  lyrics.value = i.text;
+};
+
+function saveState() {
+  save.disabled = (title.value && lyrics.value && title.value == oldTitle && lyrics.value == oldLyrics);
 };
 
 async function saveSong() {
@@ -179,6 +182,7 @@ async function saveSong() {
     song.lyrics = lyrics.value;
     let i = await request('save', song);
     if (i.saved) {
+      song = i.song;
       splice(song,i.start,i.deleteCount);
       songlist.selectedIndex = i.start;
       oldTitle = song.title;
@@ -189,11 +193,12 @@ async function saveSong() {
 };
 
 async function deleteSong() {
-  let ans = confirm(`Are you sure you want to delete the song "${songlist.options[songlist.selectedIndex].innerHTML}"?`);
-  if (ans && id.value) {
-    let r = await request('delete',{id: id.value});
+  let i = songlist.selectedIndex;
+  let song = songlist.options[i]; 
+  let ans = confirm(`Are you sure you want to delete the song "${song.innerHTML}"?`);
+  if (ans && song) {
+    let r = await request('delete',{id: song.id});
     if (r.deleted) {
-      let i = songlist.selectedIndex;
       songlist.remove(i);
       i = i>0 ? i-1 : 0;
       oldTitle = title.value;
@@ -210,10 +215,10 @@ async function deleteSong() {
 function request(path,json) {
   return new Promise((resolve, reject) => {
     var xhr = new XMLHttpRequest();
-    var url = 'https://elimfgcc.org/lyrics/';
+    let url = baseUrl;
     if (typeof path == "string" && path.length > 1) {
-      var method = 'POST';
       url += path;
+      var method = 'POST';
       var data = JSON.stringify(json);
     } else {
       var method = 'GET';
