@@ -4,6 +4,7 @@ block content
   script(src='/javascripts/auth.js')
   #editor
     #left
+      input#search(type='text', placeholder='Search', autocomplete="off")
       select#songlist(onchange='changeSong()', size=2)
     #middle
       .input
@@ -25,5 +26,4 @@ block content
         img#delete(src='/images/delete.svg', onclick='deleteSong()')
         input#new(type='button', value='New', onclick='newSong()')
         input#save(type='button', value='Save', onclick='saveSong()')
-  #tooltip
   script(src='/javascripts/main.js')

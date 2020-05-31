@@ -18,8 +18,8 @@ class Listened {
 const baseUrl = 'https://elimfgcc.org/lyrics/';
 
 var debug = document.getElementById('debug');
-var tooltip = document.getElementById('tooltip');
 var saveBtn = document.getElementById('save');
+var search = document.getElementById('search');
 var deleteBtn = document.getElementById('delete');
 var songlist = document.getElementById('songlist');
 var titleTag = document.getElementById('title');
@@ -30,12 +30,12 @@ saveBtn.disabled = true;
 
 var oldTitle = '', oldLyrics = '', oldId = '';
 var id = new Listened('');
-id.onchange(val => inner('id',val));
+id.onchange(val => inner('id',val.replace(/-.*/,'<span id="more">$&</span>')));
 var title = new Listened('');
 title.onchange(val => inner('showtitle',val));
 var lyrics = new Listened('');
 lyrics.onchange(val => inner('showlyrics',val));
-var tooltipTimer, lockTimer;
+var lockTimer;
 
 debug.value = 'loading lyrics......';
 
@@ -49,15 +49,25 @@ request()
   debug.value = '[error] cannot load lyrics';
 });
 
+search.oninput = async function(e) {
+  let i = await request('pinyin',{text:e.target.value});
+  for (let o of songlist.options) {
+    if (o.getAttribute('key').indexOf(i.term) > -1) {
+      o.style.display = 'block';
+    } else
+      o.style.display = 'none';
+  }
+}
+search.focus();
+
 songlist.onkeydown = selectKey;
 
 function splice(song, start = songlist.options.length, deleteCount = 0) {
   let option = document.createElement('option');
   option.id = replace(song.id);
   option.value = replace(song.lyrics);
+  option.setAttribute('key', song.keywords);
   option.setAttribute('data', escape(JSON.stringify(song)));
-  option.onmouseover = preview;
-  option.onmouseleave = nopreview;
   option.innerHTML = replace(song.title);
   if (start == songlist.options.length)
     songlist.add(option);
@@ -68,7 +78,7 @@ function splice(song, start = songlist.options.length, deleteCount = 0) {
 };
 
 function inner(id, val) {
-  document.getElementById(id).innerText = val;
+  document.getElementById(id).innerHTML= val;
 };
 
 function selectKey(e) {
@@ -79,24 +89,6 @@ function selectKey(e) {
       if (song) deleteSong();
       break;
   };
-};
-
-function preview(e) {
-  let lyr = e.target.value
-    .replace(/#.*|\n/g,' ')
-    .replace(/\s+/g,' ');
-  let rec = e.target.getBoundingClientRect();
-  tooltip.style.top = (rec.top + rec.height / 2) + 'px';
-  tooltip.style.left = (rec.left + rec.width / 2) + 'px';
-  tooltip.innerText = lyr;
-  tooltipTimer = setTimeout(() => {
-    tooltip.style.display = 'block';
-  }, 500);
-};
-
-function nopreview(e) {
-  clearTimeout(tooltipTimer);
-  tooltip.style.display = 'none';
 };
 
 window.onbeforeunload = function(e) {

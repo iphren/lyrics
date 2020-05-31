@@ -1,24 +1,27 @@
 body {
   padding: 0;
   margin: 0;
+  background-color: #eee;
 }
 
 label {
   user-select: none;
+  padding: 0.5vw;
 }
 
 body, input, textarea, option {
-  font-size: 1.5vw;
-  font-family: source-han-sans-cjk-sc, sans-serif;
+  font-size: 1.45vw;
+  font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   font-style: normal;
   font-weight: 400;
 }
 
 input[type='text'], textarea {
+  box-sizing: border-box;
+  padding: 0.5vw;
   border: none;
-  padding: 0;
   margin: 0;
-  outline: black 1px solid;
+  outline: none;
 }
 
 #editor {
@@ -38,6 +41,10 @@ input[type='text'], textarea {
   width: 20%;
 }
 
+#left {
+  border-right: 0.2vw solid #ccc;
+}
+
 #middle, #right {
   width: 40%;
   padding: 1vw;
@@ -48,6 +55,10 @@ input[type='text'], textarea {
   outline: none;
   border: none;
   flex-grow: 1;
+}
+
+#title {
+  width: 100%;
 }
 
 #lyrics {
@@ -112,29 +123,23 @@ input[type='text'], textarea {
 #debug {
   color: gray;
   cursor: default;
+  background-color: rgba(0,0,0,0);
 }
 
 #showtitle {
   font-size: 150%;
   font-weight: 700;
+  padding: 1vw;
+  box-sizing: border-box;
 }
 
 #showlyrics {
   overflow: auto;
-  white-space: nowrap;
-}
-#tooltip {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 2.5vw;
-  width: 20vw;
-  background-color: whitesmoke;
-  z-index: 10;
-  display: none;
-  text-overflow: ellipsis;
-  white-space: nowrap; 
-  overflow: hidden;
-  padding: 0 1vw;
+  white-space: pre;
+  padding: 1vw;
   box-sizing: border-box;
+}
+#more {
+  color: red;
+  font-weight: 700;
 }
