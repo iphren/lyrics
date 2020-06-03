@@ -4,7 +4,7 @@ module.exports = {
         name: "lyrics",
         script: "npm start",
         env: {
-          "NODE_ENV": "development",
+          "NODE_ENV": "production",
         }
       }
   ]

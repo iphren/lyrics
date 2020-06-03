@@ -1,0 +1,51 @@
+#outTitle::before {
+  content: '#';
+  padding: 0 .2rem;
+}
+
+#outTitle:empty::before {
+  opacity: 0;
+}
+
+#outId::before {
+  content: 'id: ';
+}
+
+#outId:empty::before {
+  opacity: 0;
+}
+
+#inpLyric, #outLyric {
+  resize: none;
+  white-space: pre;
+  overflow: auto;
+  text-overflow: ellipsis;
+}
+
+#outTitle {
+  font-weight: 700;
+}
+
+#logsModal .modal-content {
+}
+
+#history {
+  height: 70vh;
+  overflow: auto;
+  white-space: pre;
+}
+
+#history, #history > div, #history > div > span {
+  font-family: "Lucida Console", Monaco, monospace;
+}
+
+.navbar-toggler-icon {
+  background-image: url('/images/bars.svg');
+  opacity: 0.2;
+}
+
+@media only screen and (max-width: 575px) {
+  #inpLyric, #outLyric {
+    height: 15rem !important;
+  }
+}
