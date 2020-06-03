@@ -67,7 +67,7 @@ $(function() {
 
   search.oninput = async function(e) {
     let i = await request('pinyin', { text: e.target.value });
-    log(i.term ? `searching for ${e.target.value}...` : '');
+    if (i.term) log(`searching for <span class="font-weight-bold">${e.target.value}</span>`);
     for (let o of songList.options) {
       if (o.getAttribute('keywords').indexOf(i.term) > -1) {
         o.style.display = 'block';
@@ -238,7 +238,9 @@ $(function() {
     history.scrollTop = history.scrollHeight;
   });
   function log(msg, type = 'dark') {
-    if (history.lastChild && history.lastChild.lastChild.innerHTML.indexOf(msg) === 0) {
+    let lastMsg = history.lastChild ? history.lastChild.lastChild.innerText.replace(/ [0-9]+$/,'') : 'whosyourdaddy';
+    let thisMsg = msg.replace(/<[^>]+>/g,'');
+    if (thisMsg.indexOf(lastMsg) === 0) {
       oldMsg++;
       history.lastChild.remove();
     } else {
