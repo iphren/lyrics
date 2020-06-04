@@ -77,7 +77,8 @@ $(function() {
     if (i.term) log(`searched for <span class="font-weight-bold">${i.term}</span>`);
   }
   search.focus();
-  clear.onclick = function(e) {
+  clear.onclick = clearSearch;
+  function clearSearch() {
     search.focus();
     search.value = '';
     for (let o of songList.options) {
@@ -177,6 +178,8 @@ $(function() {
       let ans = confirm('Changes will not be saved. Do you want to create a new song?');
       if (!ans) return;
     }
+    clearSearch(); 
+    inpTitle.focus();
     oldIndex = -1;
     songList.selectedIndex = oldIndex;
     savedTitle = outTitle.innerHTML = inpTitle.value = '';
@@ -199,6 +202,7 @@ $(function() {
       song.lyrics = outLyric.value;
       let i = await request('save', song);
       if (i.saved) {
+        clearSearch(); 
         splice(i.song, i.start, i.replace);
         oldIndex = i.start;
         songList.selectedIndex = oldIndex;
