@@ -40,6 +40,10 @@ $(function() {
           document.title = 'Lyrics Centre';
           document.head.appendChild(css);
           document.head.appendChild(js);
+        } else if (xhr.response.body.innerText === 'ip blocked') {
+          input.setAttribute('readonly',true);
+          input.value = 'This IP address is blocked';
+          input.setAttribute('type','text')
         }
       }
     }

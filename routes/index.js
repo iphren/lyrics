@@ -6,15 +6,27 @@ const pinyin = require("pinyin");
 
 const router = express.Router();
 const songs = JSON.parse(fs.readFileSync(path.join(__dirname, '/../data/songs.json'),{encoding:'utf-8'}));
+const guests = {};
+const maxAttempts = 100;
+const blacklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/blacklist.json')));
 
 router.use(nocache());
 
+const security = function (req, res, next) {
+  if (req.ip in blacklist)
+    res.status(403).send('ip blocked');
+  else
+    next();
+}
+
 router.get('/', function(req, res, next) {
-  if (req.session.logged)
+  if (req.session.logged && !(req.ip in blacklist))
     res.render('index');
   else
     res.render('login');
 });
+
+router.use(security);
 
 const getToken = function (req, res, next) {
   req.auth = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/auth.json')));
@@ -23,17 +35,30 @@ const getToken = function (req, res, next) {
 
 router.post('/login', getToken, function(req, res, next) {
   req.session.logged = req.body.token === req.auth.write;
-  if (req.session.logged)
+  if (req.session.logged) {
+    if (req.ip in guests) delete guests[req.ip];
     res.render('index');
-  else
+  } else {
     next();
+  }
 });
 
 const logged = function (req, res, next) {
   if (req.session.logged)
     next();
-  else
-    res.status(403).json({ error: 'access denied' });
+  else {
+    if (req.ip in guests)
+      guests[req.ip]++;
+    else
+      guests[req.ip] = 1;
+    if (guests[req.ip] > maxAttempts) {
+      blacklist[req.ip] = true;
+      fs.writeFileSync(path.join(__dirname, '/../data/blacklist.json'), JSON.stringify(blacklist));
+      security(req, res, next);
+    } else {
+      res.status(403).json({ error: 'access denied' });
+    }
+  }
 }
 
 const canRead = function (req, res, next) {
@@ -174,5 +199,9 @@ router.post('/id', function(req, res, next) {
 });
 
 router.use(express.static(path.join(__dirname, '../private')));
+
+router.use(function(req, res, next) {
+  res.status(404).json({ error: 'not found' });
+});
 
 module.exports = router;
