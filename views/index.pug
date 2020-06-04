@@ -16,6 +16,7 @@ block content
           autocomplete="off"
           spellcheck="false"
         )
+        button#clear.btn.bg-transparent.p-2(type="button")
         button.btn.btn-link.d-sm-none.p-0.ml-3.collapsed(
           type="button"
           data-toggle="collapse"
@@ -77,11 +78,10 @@ block content
       .modal-content
         .modal-header
           h5#logsModalLabel.modal-title Logs
-          button.close(
+          button.close.m-0(
             type="button"
             data-dismiss="modal"
             aria-label="Close"
           )
-            span(aria-hidden="true") &times;
         .modal-body
           #history.form-control

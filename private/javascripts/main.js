@@ -4,6 +4,7 @@ $(function() {
     document.getElementById('loginJS').remove();
   
   const search = document.getElementById('search');
+  const clear = document.getElementById('clear');
   const songList = document.getElementById('songList');
   const inpTitle = document.getElementById('inpTitle');
   const inpLyric = document.getElementById('inpLyric');
@@ -67,15 +68,23 @@ $(function() {
 
   search.oninput = async function(e) {
     let i = await request('pinyin', { text: e.target.value });
-    if (i.term) log(`searching for <span class="font-weight-bold">${e.target.value}</span>`);
     for (let o of songList.options) {
       if (o.getAttribute('keywords').indexOf(i.term) > -1) {
         o.style.display = 'block';
       } else
         o.style.display = 'none';
     }
+    if (i.term) log(`searched for <span class="font-weight-bold">${i.term}</span>`);
   }
   search.focus();
+  clear.onclick = function(e) {
+    search.focus();
+    search.value = '';
+    for (let o of songList.options) {
+      o.style.display = 'block';
+    }
+
+  }
   
   songList.onkeydown = songListOnKey;
   function songListOnKey(e) {
@@ -226,6 +235,7 @@ $(function() {
         newBtn.disabled = true;
         savBtn.disabled = true;
         log(`<span class="font-weight-bold">${song.id}</span> deleted`, 'success');
+        log('new song', 'info');
       } else {
         log(`unable to delete <span class="font-weight-bold">${song.id}</span>`, 'danger');
       }
