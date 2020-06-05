@@ -67,12 +67,16 @@ $(function() {
   }
 
   search.oninput = async function(e) {
-    let i = await request('pinyin', { text: e.target.value });
+    let a, i = {};
+    if (/^\s*\+/.test(search.value)) {
+      i.term = search.value.replace(/^\s*\+/,'');
+      a = 'title';
+    } else {
+      i = await request('pinyin', { text: e.target.value });
+      a = 'keywords';
+    }
     for (let o of songList.options) {
-      if (o.getAttribute('keywords').indexOf(i.term) > -1) {
-        o.style.display = 'block';
-      } else
-        o.style.display = 'none';
+      o.style.display = o.getAttribute(a).indexOf(i.term) > -1 ? 'block' : 'none';
     }
     if (i.term) log(`searched for <span class="font-weight-bold">${i.term}</span>`);
   }
@@ -202,7 +206,6 @@ $(function() {
       song.lyrics = outLyric.value;
       let i = await request('save', song);
       if (i.saved) {
-        clearSearch(); 
         splice(i.song, i.start, i.replace);
         oldIndex = i.start;
         songList.selectedIndex = oldIndex;
