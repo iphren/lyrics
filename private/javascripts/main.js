@@ -69,14 +69,14 @@ $(function() {
   search.oninput = async function(e) {
     let a, i = {};
     if (/^\s*\+/.test(search.value)) {
-      i.term = search.value.replace(/^\s*\+/,'');
+      i.term = search.value.replace(/^\s*\+/,'').toLowerCase();
       a = 'title';
     } else {
       i = await request('pinyin', { text: e.target.value });
       a = 'keywords';
     }
     for (let o of songList.options) {
-      o.style.display = o.getAttribute(a).indexOf(i.term) > -1 ? 'block' : 'none';
+      o.style.display = o.getAttribute(a).toLowerCase().indexOf(i.term) > -1 ? 'block' : 'none';
     }
     if (i.term) log(`searched for <span class="font-weight-bold">${i.term}</span>`);
   }
@@ -247,7 +247,7 @@ $(function() {
         log(`unable to delete <span class="font-weight-bold">${song.id}</span>`, 'danger');
       }
     } else {
-      log('unable to delete', 'warning');
+      if (ans) log('unable to delete', 'warning');
     }
   }
 
