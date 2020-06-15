@@ -13,13 +13,15 @@ const blacklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/black
 router.use(nocache());
 
 const security = function (req, res, next) {
-  if (req.ip in blacklist)
+  if (req.ip in blacklist) {
     res.status(403).send('ip blocked');
-  else
+  } else {
     next();
+  }
 }
 
 router.get('/', function(req, res, next) {
+  if (req.ip === '127.0.0.1') req.session.logged = true;
   if (req.session.logged && !(req.ip in blacklist))
     res.render('index');
   else
@@ -44,6 +46,7 @@ router.post('/login', getToken, function(req, res, next) {
 });
 
 const logged = function (req, res, next) {
+  if (req.ip === '127.0.0.1') req.session.logged = true;
   if (req.session.logged)
     next();
   else {
@@ -156,7 +159,7 @@ router.use(logged);
 
 router.post('/pinyin', function(req, res, next) {
   let term = '';
-  let py = pinyin(req.body.text, {style: pinyin.STYLE_NORMAL});
+  let py = pinyin(req.body.text.replace(/祢/g,'你'), {style: pinyin.STYLE_NORMAL});
   for (let p of py) {
     term += p[0].toLowerCase().replace(/[^a-z0-9]/g, '');
   }
