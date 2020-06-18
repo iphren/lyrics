@@ -93,7 +93,7 @@ router.post('/save', canWrite, function(req, res, next) {
               typeof song.lyrics == 'string';
   if (saved) {
     let keywords = '', initials = '';
-    let py = pinyin(`${song.title} ${song.lyrics}`, {style: pinyin.STYLE_NORMAL});
+    let py = pinyin(`${song.title} ${song.lyrics}`.replace(/行/g,'形').replace(/祢|袮/g,'你'), {style: pinyin.STYLE_NORMAL});
 
     for (let p of py) {
       let plc = p[0].toLowerCase();
@@ -159,7 +159,7 @@ router.use(logged);
 
 router.post('/pinyin', function(req, res, next) {
   let term = '';
-  let py = pinyin(req.body.text.replace(/祢/g,'你'), {style: pinyin.STYLE_NORMAL});
+  let py = pinyin(req.body.text.replace(/行/g,'形').replace(/祢|袮/g,'你'), {style: pinyin.STYLE_NORMAL});
   for (let p of py) {
     term += p[0].toLowerCase().replace(/[^a-z0-9]/g, '');
   }
@@ -168,7 +168,7 @@ router.post('/pinyin', function(req, res, next) {
 
 router.post('/clean', function(req, res, next) {
   let text = req.body.text
-    .replace(/祢/g,'你')
+    .replace(/祢|袮/g,'你')
     .replace(/祂/g,'他')
     .replace(/[<>&。，！？【】；：]+/g,' ')
     .replace(/^\s+|\s+$/g,'')
@@ -180,7 +180,7 @@ router.post('/clean', function(req, res, next) {
 
 router.post('/id', function(req, res, next) {
   let id = '', title = req.body.title, saved = req.body.saved;
-  let py = pinyin(title,{style: pinyin.STYLE_NORMAL});
+  let py = pinyin(title.replace(/行/g,'形').replace(/祢|袮/g,'你'),{style: pinyin.STYLE_NORMAL});
   for (let i of py) {
     id += i[0].toLowerCase();
   }
