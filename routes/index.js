@@ -87,13 +87,26 @@ router.post('/lyrics', canRead, function(req, res, next) {
 })
 
 router.post('/save', canWrite, function(req, res, next) {
-  let start, replace, song = req.body;
+  let start, replace, song = req.body.song;
+  song.title = clean(song.title);
+  song.lyrics = clean(song.lyrics);
+  if (req.body.needId) {
+    song.id = createId(song.title, song.id);
+  }
   let saved = typeof song.id == 'string' &&
               typeof song.title == 'string' &&
-              typeof song.lyrics == 'string';
+              typeof song.lyrics == 'string' && 
+              song.id.length > 0 && song.title.length > 0 && song.lyrics.length > 0;
+  if (req.body.needId) {
+    if (req.body.overwrite) {
+      song.id = /^[a-z0-9]*/.exec(song.id)[0]
+    } else if (req.body.skip && /-[0-9]+/.test(song.id)) {
+      saved = false;
+    }
+  }
   if (saved) {
     let keywords = '', initials = '';
-    let py = pinyin(`${song.title} ${song.lyrics}`.replace(/行/g,'形').replace(/祢|袮/g,'你'), {style: pinyin.STYLE_NORMAL});
+    let py = pinyin(`${song.title} ${song.lyrics}`.replace(/行/g,'形'), {style: pinyin.STYLE_NORMAL});
 
     for (let p of py) {
       let plc = p[0].toLowerCase();
@@ -121,6 +134,10 @@ router.post('/save', canWrite, function(req, res, next) {
           replace = false;
           break songlist;
         case 0:
+          if (req.body.keepLyrics) {
+            song.lyrics = songs[i].lyrics;
+            song.keywords = songs[i].keywords
+          }
           songs[i] = song;
           start = i;
           replace = true;
@@ -167,31 +184,33 @@ router.post('/pinyin', function(req, res, next) {
 });
 
 router.post('/clean', function(req, res, next) {
-  let text = req.body.text
-    .replace(/祢|袮/g,'你')
-    .replace(/祂/g,'他')
-    .replace(/\[[^\]]*\]/g, '')
-    .replace(/【[^】]*】/g, '')
-    .replace(/\([^\)]*\)/g, '')
-    .replace(/（[^）]*）/g, '')
-    .replace(/<[^>]*>/g, '')
-    .replace(/《[^》]*》/g, '')
-    .replace(/[<>《》\(\)（）&。，！？\[\]【】；：]+/g,' ')
-    .replace(/^\s+|\s+$/g,'')
-    .replace(/^[^\S\r\n]+|[^\S\r\n]+$/gm,'')
-    .replace(/[^\S\r\n]+/g,' ')
-    .replace(/\n\n+/g,'\n\n');
-  res.json({text:text});
+  res.json({text: clean(req.body.text)});
 });
 
+function clean(text) {
+  return text
+  .replace(/祢|袮/g,'你')
+  .replace(/祂/g,'他')
+  .replace(/\[[^\]]*\]|【[^】]*】|\([^\)]*\)|（[^）]*）|<[^>]*>|《[^》]*》/g, '')
+  .replace(/[<>《》\(\)（）&。，！？\[\]【】；：]+/g,' ')
+  .replace(/^\s+|\s+$/g,'')
+  .replace(/^[^\S\r\n]+|[^\S\r\n]+$/gm,'')
+  .replace(/[^\S\r\n]+/g,' ')
+  .replace(/\n\n+/g,'\n\n');
+}
+
 router.post('/id', function(req, res, next) {
-  let id = '', title = req.body.title, saved = req.body.saved;
+  res.json({id: createId(req.body.title, req.body.saved)});
+});
+
+function createId(title, saved) {
+  let id = '';
   let py = pinyin(title.replace(/行/g,'形').replace(/祢|袮/g,'你'),{style: pinyin.STYLE_NORMAL});
   for (let i of py) {
     id += i[0].toLowerCase();
   }
   id = id.replace(/[^a-z0-9]/g, '');
-  if (id == saved.match(/^[a-z0-9]*/)) {
+  if (id === /^[a-z0-9]*/.exec(saved)[0]) {
     id = saved;
   } else {
     let i = 2;
@@ -204,8 +223,8 @@ router.post('/id', function(req, res, next) {
     }
     id = newid;
   }
-  res.json({id: id});
-});
+  return id;
+}
 
 router.use(express.static(path.join(__dirname, '../private')));
 

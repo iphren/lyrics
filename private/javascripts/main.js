@@ -204,7 +204,7 @@ $(function() {
       song.title = outTitle.innerHTML;
       song.id = outId.innerHTML;
       song.lyrics = outLyric.value;
-      let i = await request('save', song);
+      let i = await request('save', {song: song});
       if (i.saved) {
         splice(i.song, i.start, i.replace);
         oldIndex = i.start;
