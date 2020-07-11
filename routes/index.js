@@ -106,7 +106,7 @@ router.post('/save', canWrite, function(req, res, next) {
   }
   if (saved) {
     let keywords = '', initials = '';
-    let py = pinyin(`${song.title} ${song.lyrics}`.replace(/行/g,'形'), {style: pinyin.STYLE_NORMAL});
+    let py = myPinyin(`${song.title} ${song.lyrics}`);
 
     for (let p of py) {
       let plc = p[0].toLowerCase();
@@ -114,8 +114,8 @@ router.post('/save', canWrite, function(req, res, next) {
       plc.split(/[^a-z0-9]/).forEach(s => {
         let m = s.match(/[a-z0-9]/);
         if (m) initials += m[0];
-      })
-    };
+      });
+    }
     song.keywords = song.id + initials + keywords;
     songlist:
     for (let i = 0; i < songs.length; i++) {
@@ -126,7 +126,7 @@ router.post('/save', canWrite, function(req, res, next) {
             start = i + 1;
             replace = false;
             break songlist;
-          };
+          }
           break;
         case -1:
           songs.splice(i, 0, song);
@@ -192,7 +192,7 @@ function clean(text) {
   .replace(/祢|袮/g,'你')
   .replace(/祂/g,'他')
   .replace(/\[[^\]]*\]|【[^】]*】|\([^\)]*\)|（[^）]*）|<[^>]*>|《[^》]*》/g, '')
-  .replace(/[<>《》\(\)（）&。，、！？\[\]【】；：]+/g,' ')
+  .replace(/[<>《》\(\)（）&。，”“、！？\[\]【】；：]+/g,' ')
   .replace(/^\s+|\s+$/g,'')
   .replace(/^[^\S\r\n]+|[^\S\r\n]+$/gm,'')
   .replace(/[^\S\r\n]+/g,' ')
@@ -203,9 +203,13 @@ router.post('/id', function(req, res, next) {
   res.json({id: createId(req.body.title, req.body.saved)});
 });
 
+function myPinyin(text) {
+  return pinyin(text.replace(/行/g,'形').replace(/祢|袮/g,'你'), {style: pinyin.STYLE_NORMAL});
+}
+
 function createId(title, saved) {
   let id = '';
-  let py = pinyin(title.replace(/行/g,'形').replace(/祢|袮/g,'你'),{style: pinyin.STYLE_NORMAL});
+  let py = myPinyin(title);
   for (let i of py) {
     id += i[0].toLowerCase();
   }
