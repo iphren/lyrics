@@ -176,7 +176,7 @@ router.use(logged);
 
 router.post('/pinyin', function(req, res, next) {
   let term = '';
-  let py = pinyin(req.body.text.replace(/行/g,'形').replace(/祢|袮/g,'你'), {style: pinyin.STYLE_NORMAL});
+  let py = myPinyin(req.body.text);
   for (let p of py) {
     term += p[0].toLowerCase().replace(/[^a-z0-9]/g, '');
   }
@@ -204,7 +204,7 @@ router.post('/id', function(req, res, next) {
 });
 
 function myPinyin(text) {
-  return pinyin(text.replace(/行/g,'形').replace(/祢|袮/g,'你'), {style: pinyin.STYLE_NORMAL});
+  return pinyin(text.replace(/行/g,'形').replace(/着/g,'这').replace(/弹/g,'谈').replace(/祢|袮/g,'你'), {style: pinyin.STYLE_NORMAL});
 }
 
 function createId(title, saved) {
