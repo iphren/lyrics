@@ -1,3 +1,4 @@
 data/
 sessions
 *.py
+node_modules/
