@@ -81,7 +81,7 @@ router.post('/save', access('lyrics.write'), (req, res) => {
 
 router.post(
     '/playlist/:part',
-    access('playlist.read'),
+    access('playlist.write'),
     sanitize('part', /[^a-z]/g),
     async (req, res) => {
         try {
