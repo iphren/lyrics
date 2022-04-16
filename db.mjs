@@ -100,4 +100,24 @@ const keyScopeApp = (key, scope) => {
         , [key, scope]);
 };
 
-export { query, dataQuery, insert, update, keyScopeApp }
+const addPlaylist = (playlist) => {
+    return new Promise(async (resolve, reject) => {
+        let conn;
+        try {
+            conn = await pool.getConnection();
+            const res = await conn.query('INSERT INTO `playlists` SET `id` = NULL');
+            for (let song of playlist) {
+                await conn.query('INSERT INTO `playlistItems` SET `playlistId` = ?, `songId` = ?', [res.insertId, song.songId]);
+            }
+            resolve(res.insertId);
+        } catch (err) {
+            reject(err);
+        } finally {
+            if (conn) {
+                conn.end();
+            }
+        }
+    });
+};
+
+export { query, dataQuery, insert, update, keyScopeApp, addPlaylist }
