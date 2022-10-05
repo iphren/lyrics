@@ -23,7 +23,7 @@ const cleanLyrics = (text) => {
         .replace(/\n\n+/g, '\n\n');
 };
 
-const save = (song) => {
+const save = (song, weak = false) => {
     return new Promise(async (resolve, reject) => {
         song.title = cleanLyrics(song.title);
         song.lyrics = cleanLyrics(song.lyrics);
@@ -32,6 +32,15 @@ const save = (song) => {
             && song.title.length > 0
             && song.lyrics.length > 0) {
             let baseId = toPinyin(song.title).map(p => p[0].toLowerCase()).join('').replace(/[^a-z0-9]/g, '');
+            if (weak) {
+                baseId += '-probation';
+                if (song.songId) {
+                    let results = await query('SELECT id FROM songs WHERE songId = ? AND deleted = 0', [song.songId]);
+                    if (results && results.length && results[0].id.indexOf('-probation') == -1) {
+                        delete song.songId;
+                    }
+                }
+            }
             let repeat = 1;
             song.id = baseId;
             let results;
@@ -80,4 +89,6 @@ const save = (song) => {
     });
 };
 
-export { toPinyin, cleanLyrics, save }
+const weaksave = (song) => save(song, true);
+
+export { toPinyin, cleanLyrics, save, weaksave }

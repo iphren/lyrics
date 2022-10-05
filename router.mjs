@@ -5,12 +5,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { query, keyScopeApp, addPlaylist } from './db.mjs';
-import { save } from './lyrics.mjs';
+import { save, weaksave } from './lyrics.mjs';
 
 const router = express.Router();
 router.use(nocache());
 
-const access = (scope) => {
+const access = (scope, redirect = undefined) => {
     return (req, res, next) => {
         let apiKey;
         switch (req.method) {
@@ -32,6 +32,9 @@ const access = (scope) => {
                 if (result) {
                     console.log(`[${new Date().toISOString()}]<${req.ip}> (${result.app}) ${req.method} ${req.url}`);
                     next();
+                } else if (typeof redirect === 'string') {
+                    console.log(`[${new Date().toISOString()}]<${req.ip}> #REDIRECT# ${req.method} ${req.url} -> ${redirect}`);
+                    res.redirect(307, redirect);
                 } else {
                     console.log(`[${new Date().toISOString()}]<${req.ip}> #DENIED# ${req.method} ${req.url}`);
                     res.status(401).end();
@@ -62,15 +65,37 @@ router.post('/lyrics', access('lyrics.read'), (_, res) => {
         });
 });
 
-router.post('/delete', access('lyrics.write'), (req, res) => {
+router.post('/delete', access('lyrics.write', 'weakdelete'), (req, res) => {
     query('UPDATE songs SET deleted = 1 WHERE id = ? AND deleted = 0', [req.body.id])
         .then((results) => {
             res.json({ deleted: !!results.affectedRows });
         })
 });
 
-router.post('/save', access('lyrics.write'), (req, res) => {
+router.post('/weakdelete', access('playlist.read'), (req, res) =>{
+    if (req.body.id.indexOf('-probation') > -1) {
+        query('UPDATE songs SET deleted = 1 WHERE id = ? AND deleted = 0', [req.body.id])
+            .then((results) => {
+                res.json({ deleted: !!results.affectedRows });
+            });
+    } else {
+        console.log(`[${new Date().toISOString()}]<${req.ip}> #DENIED# ${req.method} ${req.url}`);
+        res.status(401).end();
+    }
+});
+
+router.post('/save', access('lyrics.write', 'weaksave'), (req, res) => {
     save(req.body.song)
+        .then((song) => {
+            res.json({ song: song });
+        })
+        .catch((code) => {
+            res.status(code).end();
+        });
+});
+
+router.post('/weaksave', access('playlist.read'), (req, res) =>{
+    weaksave(req.body.song)
         .then((song) => {
             res.json({ song: song });
         })
