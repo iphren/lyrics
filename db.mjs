@@ -93,7 +93,7 @@ const update = (table, data, idName) => {
 
 const keyScopeApp = (key, scope) => {
     return query(
-        'SELECT k.app FROM apiKeyScopes AS ks '
+        'SELECT k.id, k.app FROM apiKeyScopes AS ks '
         + 'INNER JOIN apiKeys AS k ON ks.keyId = k.id '
         + 'INNER JOIN apiScopes AS s ON ks.scopeId = s.id '
         + 'WHERE k.key = ? AND s.scope = ? AND k.valid = 1'

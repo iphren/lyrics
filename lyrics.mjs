@@ -23,7 +23,7 @@ const cleanLyrics = (text) => {
         .replace(/\n\n+/g, '\n\n');
 };
 
-const save = (song, weak = false) => {
+const save = (song, appId, weak = false) => {
     return new Promise(async (resolve, reject) => {
         song.title = cleanLyrics(song.title);
         song.lyrics = cleanLyrics(song.lyrics);
@@ -71,7 +71,7 @@ const save = (song, weak = false) => {
                 });
             }
             song.keywords = song.id + initials + keywords;
-            query('UPDATE songs SET keywords = ? WHERE id = ?', [song.keywords, song.id])
+            query('UPDATE songs SET keywords = ?, modifiedBy = ? WHERE id = ?', [song.keywords, appId, song.id])
                 .then((results) => {
                     if (results.affectedRows) {
                         resolve(song);
@@ -89,6 +89,6 @@ const save = (song, weak = false) => {
     });
 };
 
-const weaksave = (song) => save(song, true);
+const weaksave = (song, appId) => save(song, appId, true);
 
 export { toPinyin, cleanLyrics, save, weaksave }

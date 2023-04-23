@@ -31,6 +31,7 @@ const access = (scope, redirect = undefined) => {
             .then(([result]) => {
                 if (result) {
                     console.log(`[${new Date().toISOString()}]<${req.ip}> (${result.app}) ${req.method} ${req.url}`);
+                    req.appId = result.id;
                     next();
                 } else if (typeof redirect === 'string') {
                     console.log(`[${new Date().toISOString()}]<${req.ip}> #REDIRECT# ${req.method} ${req.url} -> ${redirect}`);
@@ -66,7 +67,7 @@ router.post('/lyrics', access('lyrics.read'), (_, res) => {
 });
 
 router.post('/delete', access('lyrics.write', 'weakdelete'), (req, res) => {
-    query('UPDATE songs SET deleted = 1 WHERE id = ? AND deleted = 0', [req.body.id])
+    query('UPDATE songs SET deleted = 1, modifiedBy = ? WHERE id = ? AND deleted = 0', [req.appId, req.body.id])
         .then((results) => {
             res.json({ deleted: !!results.affectedRows });
         })
@@ -74,7 +75,7 @@ router.post('/delete', access('lyrics.write', 'weakdelete'), (req, res) => {
 
 router.post('/weakdelete', access('playlist.read'), (req, res) =>{
     if (req.body.id.indexOf('-probation') > -1) {
-        query('UPDATE songs SET deleted = 1 WHERE id = ? AND deleted = 0', [req.body.id])
+        query('UPDATE songs SET deleted = 1, modifiedBy = ? WHERE id = ? AND deleted = 0', [req.appId, req.body.id])
             .then((results) => {
                 res.json({ deleted: !!results.affectedRows });
             });
@@ -85,7 +86,7 @@ router.post('/weakdelete', access('playlist.read'), (req, res) =>{
 });
 
 router.post('/save', access('lyrics.write', 'weaksave'), (req, res) => {
-    save(req.body.song)
+    save(req.body.song, req.appId)
         .then((song) => {
             res.json({ song: song });
         })
@@ -95,7 +96,7 @@ router.post('/save', access('lyrics.write', 'weaksave'), (req, res) => {
 });
 
 router.post('/weaksave', access('playlist.read'), (req, res) =>{
-    weaksave(req.body.song)
+    weaksave(req.body.song, req.appId)
         .then((song) => {
             res.json({ song: song });
         })
@@ -124,7 +125,7 @@ router.post(
 
 router.get(
     '/playlist/:part',
-    //access('playlist.read'),
+    //access('playlist.read'), allow public access
     sanitize('part', /[^a-z]/g),
     async (req, res) => {
         try {
@@ -144,7 +145,7 @@ router.get(
 
 router.get(
     '/playlists/:id',
-    //access('playlist.read'),
+    //access('playlist.read'), allow public access
     async (req, res) => {
         query('SELECT s.* FROM songs s INNER JOIN playlistItems pI on s.songId = pI.songId WHERE pI.playlistId = ?', [req.params.id])
             .then((playlist) => {
